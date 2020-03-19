@@ -36,11 +36,11 @@ Q1.1) Does schizophrenia involved altercentric intrusion? Define model and prior
 ```{r}
 pacman::p_load(tidyverse, brms,parallel)
 
-detectCores()
+cores<- detectCores()
 # Prepare the data
 
 d <- read_csv("Ass3.csv")
-#summary(d)
+summary(d)
 
 d$Diagnosis <- plyr::revalue(as.character(d$Diagnosis), 
                              c("0"="Controls", "1"="Schizophrenia"))
@@ -51,6 +51,8 @@ d <- d %>%
     Diagnosis = as.factor(Diagnosis)
   )
 
+
+summary(d$Diagnosis)
 # Define the formula
 
 AltercentricDiagnosis_f0 <- bf(
@@ -78,7 +80,8 @@ AltercentricDiagnosis_PriorCheck_m <- brm(
   data = d,
   family = gaussian,
   prior = priorDiagnosis,
-  sample_prior = "only"
+  sample_prior = "only",
+  cores = 4
 )
 
 pp_check(AltercentricDiagnosis_PriorCheck_m, nsamples = 100)
@@ -89,7 +92,8 @@ AltercentricDiagnosis_m <- brm(
   data = d,
   family = gaussian,
   prior = priorDiagnosis,
-  sample_prior = T
+  sample_prior = T,
+  cores = 4
 )
 
 # Posterior predictive check
