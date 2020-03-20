@@ -144,25 +144,30 @@ Q1.2) Is altercentric intrusion related to specific symptoms *in the patients*? 
 # priorcenter <- c(
 #   prior(normal(0, 2), class = b), # mean and then 2SD - inspect the data
 #   prior(normal(1, 2), class = sigma)
-## define formula ##
 
+
+## Isolate disorder group
 schizoData <- d %>% 
   filter(Diagnosis == 1)
 
-# voice hearing
 
+## define formula and priors ##
+
+schizoSummary<- psych::describe(schizoData)
+
+# voice hearing
 AI_VoiceHearing_f0 <- bf(
   AltercentricIntrusion ~ 0 + VoiceHearing)
 
 AI_VoiceHearing_f1 <- bf(
   AltercentricIntrusion ~ 1 + VoiceHearing)
 
-get_prior(AI_VoiceHearing_f0, family = gaussian,schizoData)
 
-priorDiagnosis <- c(
-  prior(normal(4, 1), class = b), # mean and then 2SD - inspect the data
-  prior(normal(1, 2), class = sigma)
-) 
+
+priorVoiceHearing <- c(
+  prior(normal(2, 0.9), class = b), # mean and then 2SD - inspect the data
+  prior(normal(0.9,1.8), class = sigma))
+
 
 # MindReading
 
@@ -173,6 +178,11 @@ AI_MindReading_f1 <- bf(
   AltercentricIntrusion ~ 1 + MindReading)
 
 
+priorMindReading <- c(
+  prior(normal(2, 0.8), class = b), # mean and then 2SD - inspect the data
+  prior(normal(0.8,1.6), class = sigma))
+
+
 # Apathy
 
 AI_Apathy_f0 <- bf(
@@ -180,6 +190,10 @@ AI_Apathy_f0 <- bf(
 
 AI_Apathy_f1 <- bf(
   AltercentricIntrusion ~ 1 + Apathy)
+
+priorApathy <- c(
+  prior(normal(2, 0.9), class = b), # mean and then 2SD - inspect the data
+  prior(normal(0.9,1.8), class = sigma))
 
 
 # all
@@ -232,18 +246,19 @@ pp_check(AI_MindReading_m0, nsamples = 100)
 ```{r}
 ## function for fitting a model, posterior check,
 
-all_you_need <- function(your_formula, prior, your_relationship){
+all_you_need <- function(your_formula,your_prior,your_data,your_relationship){
   
   # the model
   function_model <- brm(
-  formula = your_formula,
-  data = d,
-  family = gaussian,
-  prior = prior0,
-  sample_prior = T,
-  refresh = 0,
-  cores = cores
+    formula = your_formula,
+    data = your_data,
+    family = gaussian,
+    prior = your_prior,
+    sample_prior = T,
+    refresh = 0,
+    cores = cores
   )
+  
   
   # a plot for a posterior check
   plot <- pp_check(function_model, nsamples = 100)
@@ -259,6 +274,7 @@ all_you_need <- function(your_formula, prior, your_relationship){
   return(k)
 }
 
+
 ## calling all desirable items at once (thanks Peter)
 print_print <- function(list){
   print(list[1])
@@ -269,19 +285,19 @@ print_print <- function(list){
 
 ## voice hearing
 VoiceHearing0 <- 
-  all_you_need(AI_VoiceHearing_f0, prior0, your_relationship = "VoiceHearing > 0")
+  all_you_need(AI_VoiceHearing_f0, priorVoiceHearing, your_relationship = "VoiceHearing > 0")
 
 print_print(VoiceHearing0)
 
 ## mind reading
 MindReading0 <- 
-  all_you_need(AI_MindReading_f0, prior0, your_relationship = "MindReading > 0")
+  all_you_need(AI_MindReading_f0, priorMindReading, your_relationship = "MindReading > 0")
 
 print_print(MindReading0)
 
 ## apathy
 Apathy0 <- 
-  all_you_need(AI_Apathy_f0, prior0, your_relationship = "Apathy > 0")
+  all_you_need(AI_Apathy_f0, priorApathy, your_relationship = "Apathy > 0")
 
 
 print_print(Apathy0)
