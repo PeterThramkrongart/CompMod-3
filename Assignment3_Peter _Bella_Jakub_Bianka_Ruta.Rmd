@@ -36,7 +36,7 @@ Q1.1) Does schizophrenia involved altercentric intrusion? Define model and prior
 ```{r}
 pacman::p_load(tidyverse, brms, PerformanceAnalytics, parallel, vcov, GridExtra)
 
-
+set.seed(123)
 
 cores<- detectCores()#for parallel processing
 # Prepare the data
@@ -88,8 +88,8 @@ AltercentricDiagnosis_PriorCheck_m <- brm(
   cores = cores,
   file = "AltercentricDiagnosis_PriorCheck_m"
 )
-
-pp_check(AltercentricDiagnosis_PriorCheck_m, nsamples = 100)
+#
+pp_check(AltercentricDiagnosis_PriorCheck_m, nsamples = 100)+ggtitle("AI~Diagnosis PriorCheck")
 
 ## Fitting the model
 AltercentricDiagnosis_m <- brm(
@@ -106,22 +106,19 @@ AltercentricDiagnosis_m <- brm(
 plot(AltercentricDiagnosis_m)
 
 # Posterior predictive check
-pp_check(AltercentricDiagnosis_m, nsamples = 100)
+pp_check(AltercentricDiagnosis_m, nsamples = 100)+ggtitle("AI~Diagnosis Posterior predictive check")
 
 ## Check the model for warnings
 AltercentricDiagnosis_m
 
 # Hypothesis testing + updating check
 plot(hypothesis(AltercentricDiagnosis_m,
-           "DiagnosisSchizophrenia > DiagnosisControls"))
+           "DiagnosisSchizophrenia > DiagnosisControls"))[[1]]+ggtitle("Is AI higher in Schizophrenia patients?")
 
 hypothesis(AltercentricDiagnosis_m,
            "DiagnosisSchizophrenia > DiagnosisControls")
 
-conditional_effects(AltercentricDiagnosis_m)
-
-
-plot(conditional_effects(AltercentricDiagnosis_m), points=T)
+plot(conditional_effects(AltercentricDiagnosis_m), points=T,plot=F)[[1]]+ggtitle("Estimates of AI ~ Diagnosis")
 
 #evidence ratio - the posterior is a bunch of samples and we want to count how many of them are in/compatimble with our hypothesis and we count them and gives us the ratio (21 min)
 ```
@@ -200,7 +197,7 @@ check_prior <- function(formula, data, prior, filename){
   sample_prior = "only",
   control = list( adapt_delta = 0.95),
   core = cores,
-  file = "filename")
+  file = filename)
   
   p_check <- pp_check(model, nsamples = 100)
   return(p_check)
@@ -208,20 +205,20 @@ check_prior <- function(formula, data, prior, filename){
 
 ## prior checking
 
-checkprior_VH <- check_prior(AI_VoiceHearing_f1, schizoData, priorR2, checkprior_VH)
-checkprior_VH
+checkprior_VH <- check_prior(AI_VoiceHearing_f1, schizoData, priorR2, "checkprior_VH")
+checkprior_VH+ggtitle("AI~VoiceHearing Prior check")
 
-checkprior_MR <- check_prior(AI_MindReading_f1, schizoData, priorR2, checkprior_MR)
-checkprior_MR
+checkprior_MR <- check_prior(AI_MindReading_f1, schizoData, priorR2, "checkprior_MR")
+checkprior_MR+ggtitle("AI~MindReading Prior check")
 
-checkprior_Apathy <- check_prior(AI_Apathy_f1, schizoData, priorR2, checkprior_Apathy)
-checkprior_Apathy
+checkprior_Apathy <- check_prior(AI_Apathy_f1, schizoData, priorR2, "checkprior_Apathy")
+checkprior_Apathy+ggtitle("AI~Apathy Prior check")
 
-checkprior_VH_MR <- check_prior(AI_VH_MR_f1, schizoData, priorR2, ceckprior_VH_MR)
-checkprior_VH_MR
+checkprior_VH_MR <- check_prior(AI_VH_MR_f1, schizoData, priorR2, "checkprior_VH_MR")
+checkprior_VH_MR+ggtitle("AI~VoiceHearing+MindReading Prior check")
 
-checkprior_VC_MR_A <- check_prior(AI_VH_MR_A_f1, schizoData, priorR2, checkprior_VC_MR_A)
-checkprior_VC_MR_A
+checkprior_VC_MR_A <- check_prior(AI_VH_MR_A_f1, schizoData, priorR2, "checkprior_VC_MR_A")
+checkprior_VC_MR_A+ggtitle("AI~VoiceHearing+MindReading+Apathy Prior check")
 
 ```
 
@@ -248,14 +245,13 @@ plot(VoiceHearing1)
   
 # a plot for a posterior check
 VH_posch <- pp_check(VoiceHearing1, nsamples = 100)
-VH_posch
+VH_posch+ggtitle("Ai~VoiceHearing Posterior Check")
   
 # test and plot your hypothesis
 VH_hyp <- hypothesis(VoiceHearing1, "VoiceHearing > 0")
 VH_hyp
 
-plot(VH_hyp)  
-plot(conditional_effects(VoiceHearing1), points = T)
+plot(conditional_effects(VoiceHearing1), points = T)[[1]]+ggtitle("Ai~VoiceHearing")
   
 
 ## mind reading ##
@@ -277,14 +273,16 @@ MindReading1
 plot(MindReading1)
 # a plot for a posterior check
 MR_posch <- pp_check(MindReading1, nsamples = 100)
-MR_posch
+MR_posch+ggtitle("Ai~MindReading Posterior Check")
+  
   
 # test and plot your hypothesis
 MR_hyp <- hypothesis(MindReading1, "MindReading > 0")
 MR_hyp
 
-plot(MR_hyp)  
-plot(conditional_effects(MindReading1), points = T)
+
+plot(MR_hyp)
+plot(conditional_effects(MindReading1), points = T)[[1]]+ggtitle("Ai~MindReading")
   
 
 ## apathy ##
@@ -307,14 +305,15 @@ plot(Apathy1)
 
 # a plot for a posterior check
 A_posch <- pp_check(Apathy1, nsamples = 100)
-A_posch
+A_posch+ggtitle("Ai~Apathy Posterior Check")
+  
   
 # test and plot your hypothesis
 A_hyp <- hypothesis(Apathy1, "Apathy < 0")
 A_hyp
 
 plot(A_hyp)  
-plot(conditional_effects(Apathy1), points = T)
+plot(conditional_effects(Apathy1), points = T)[[1]]+ggtitle("Ai~Apathy")
 ```
 
 
@@ -337,7 +336,7 @@ AI_VH_MR_m1
 plot(AI_VH_MR_m1)
 
 # Posterior predictive check
-pp_check(AI_VH_MR_m1, nsamples = 100)
+pp_check(AI_VH_MR_m1, nsamples = 100)+ggtitle("AI~VoiceHearing+MindReading Posterior Predictive Check")
 
 # Hypothesis testing + updating check
 
@@ -350,8 +349,8 @@ hypothes_VHMR_MR <- hypothesis(AI_VH_MR_m1,
 hypothes_VHMR_VH
 hypothes_VHMR_MR
 
-pp1 <- plot(hypothes_VHMR_VH)
-pp2 <- plot(hypothes_VHMR_MR)
+plot(hypothes_VHMR_VH,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading")
+plot(hypothes_VHMR_MR,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading")
 
 
 ## conditional effects
@@ -378,7 +377,7 @@ plot(AI_VH_MR_A_m1)
 
 
 # Posterior predictive check
-pp_check(AI_VH_MR_A_m1, nsamples = 100)
+pp_check(AI_VH_MR_A_m1, nsamples = 100)+ggtitle("AI~VoiceHearing+MindReading+Apathy Posterior Predictive Check")
 
 # Hypothesis testing + updating check
 
@@ -397,9 +396,9 @@ hypothes3_MR
 hypothes3_Apathy
 
 
-plot(hypothes3_VH)
-plot(hypothes3_MR)
-plot(hypothes3_Apathy)
+plot(hypothes3_VH,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading+Apathy")
+plot(hypothes3_MR,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading+Apathy")
+plot(hypothes3_Apathy,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading+Apathy")
 
 
 ## conditional effects
@@ -444,8 +443,8 @@ champion_A_f <- bf(
   AltercentricIntrusion ~ 1 + Apathy)
 
 # prior check
-checkprior_champion <- check_prior(champion_A_f, d, priorR2)
-checkprior_champion
+checkprior_champion <- check_prior(champion_A_f, d, priorR2,"AI~Apathy_allData")
+checkprior_champion+ggtitle("AI~Apathy prior check using all data")
 
 
 # model
@@ -469,14 +468,14 @@ plot(champion_A_m)
 
 # a plot for a posterior check
 champion_posch <- pp_check(champion_A_m, nsamples = 100)
-champion_posch
+champion_posch+ggtitle("AI~Apathy Posterior Pedictive Check using all data")
   
 # test and plot your hypothesis
 champion_hyp <- hypothesis(champion_A_m, "Apathy < 0")
 champion_hyp
 
-plot(champion_hyp)  
-plot(conditional_effects(champion_A_m), points = T)
+plot(champion_hyp,plot = F)[[1]]+ggtitle("Using all data") 
+plot(conditional_effects(champion_A_m), points = T,plot=F)[[1]]+ggtitle("Estimates of AI ~ Apathy using all data")
 
 ```
 
@@ -486,7 +485,7 @@ TheoryFormula <- bf(
   AltercentricIntrusion ~ 1 + MindReading+VoiceHearing)
 
 # prior check
-checkprior_TheoryFormula <- check_prior(TheoryFormula, d, priorR2)
+checkprior_TheoryFormula <- check_prior(TheoryFormula, d, priorR2,"AI~VH_MR_AllData")
 checkprior_TheoryFormula
 
 
@@ -510,7 +509,7 @@ plot(TheoryFormulaModel)
 
 # a plot for a posterior check
 theory_posch <- pp_check(TheoryFormulaModel, nsamples = 100)
-theory_posch
+theory_posch +ggtitle("AI~MindReading+VoiceHearing Prior Check using all data")
   
 # test and plot your hypothesis
 theory_hyp_MR <- hypothesis(TheoryFormulaModel, "MindReading > 0")
@@ -519,14 +518,16 @@ theory_hyp_MR
 theory_hyp_VH <- hypothesis(TheoryFormulaModel, "VoiceHearing > 0")
 theory_hyp_VH
 
-plot(theory_hyp_MR) 
+plot(theory_hyp_MR,plot=F)[[1]]+ggtitle("AI~MindReading+VoiceHearing Hypothesis Test using all data") 
 
-plot(theory_hyp_VH)
+plot(theory_hyp_VH,plot=F)[[1]]+ggtitle("AI~MindReading+VoiceHearing Hypothesis Test using all data")
 
 plot(conditional_effects(TheoryFormulaModel), points = T)
 
 
 ```
+
+
 ```{r, Comparing better models}
 
 ## adding criterion loo
@@ -543,7 +544,131 @@ loo_model_weights(TheoryFormulaModel,
                   champion_A_m)
 
 ```
+```{r, Building other models}
 
+### voice hearing
+VoiceHearing2 <- brm(
+    formula = AI_VoiceHearing_f1,
+    data = d,
+    family = gaussian,
+    prior = priorR2,
+    sample_prior = T,
+    refresh = 0,
+    cores = cores,
+    file = "VoiceHearing2"
+    
+  )
+  VoiceHearing2
+  
+# a plot for a posterior check
+VH_posch2 <- pp_check(VoiceHearing2, nsamples = 100)
+VH_posch2
+  
+# test and plot your hypothesis
+VH_hyp2 <- hypothesis(VoiceHearing2, "VoiceHearing > 0")
+VH_hyp2
+
+plot(VH_hyp2)  
+plot(conditional_effects(VoiceHearing2), points = T)
+  
+
+## mind reading
+
+MindReading2 <- brm(
+    formula = AI_MindReading_f1,
+    data = d,
+    family = gaussian,
+    prior = priorR2,
+    sample_prior = T,
+    refresh = 0,
+    cores = cores,
+    file = "MindReading2"
+    )
+
+MindReading2
+# a plot for a posterior check
+MR_posch2 <- pp_check(MindReading2, nsamples = 100)
+MR_posch2
+  
+# test and plot your hypothesis
+MR_hyp2 <- hypothesis(MindReading2, "MindReading > 0")
+MR_hyp2
+
+plot(MR_hyp2)  
+plot(conditional_effects(MindReading2), points = T)
+  
+# VH + MR + A
+AI_VH_MR_A_m2 <- brm(
+  formula = AI_VH_MR_A_f1,
+  data = d,
+  family = gaussian,
+  prior = priorR2,
+  sample_prior = T,
+  cores = cores,
+  file = "AI_VH_MR_A_m2"
+)
+
+AI_VH_MR_A_m2
+
+# Posterior predictive check
+pp_check(AI_VH_MR_A_m2, nsamples = 100)
+
+# Hypothesis testing + updating check
+
+hypothes3_VH2 <- hypothesis(AI_VH_MR_A_m2,
+           "VoiceHearing > 0")
+
+hypothes3_MR2 <- hypothesis(AI_VH_MR_A_m2,
+           "MindReading > 0")
+
+hypothes3_Apathy2 <- hypothesis(AI_VH_MR_A_m2,
+           "Apathy > 0")
+
+
+hypothes3_VH2
+hypothes3_MR2
+hypothes3_Apathy2
+
+
+plot(hypothes3_VH2)
+plot(hypothes3_MR2)
+plot(hypothes3_Apathy2)
+
+
+## conditional effects
+plot(conditional_effects(AI_VH_MR_A_m2), points = T)
+
+
+
+
+
+
+```
+
+
+```{r, Comparing better models2}
+
+## adding criterion loo
+VoiceHearing2 <- add_criterion(VoiceHearing2, criterion = "loo")
+MindReading2 <- add_criterion(MindReading2, criterion = "loo")
+champion_A_m  <- add_criterion(champion_A_m, criterion = "loo")
+TheoryFormulaModel <- add_criterion(TheoryFormulaModel, criterion = "loo")
+AI_VH_MR_A_m2 <- add_criterion(AI_VH_MR_A_m2, criterion = "loo")
+
+
+loo_compare(VoiceHearing2,
+            MindReading2,
+            champion_A_m,
+            TheoryFormulaModel,
+            AI_VH_MR_A_m2)
+## adding wights
+loo_model_weights(VoiceHearing2,
+            MindReading2,
+            champion_A_m,
+            TheoryFormulaModel,
+            AI_VH_MR_A_m2)
+
+```
 
 
 ## Third part

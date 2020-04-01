@@ -94,6 +94,8 @@ pacman::p_load(tidyverse, brms, PerformanceAnalytics, parallel, vcov, GridExtra)
     ## GridExtra
 
 ``` r
+set.seed(123)
+
 cores<- detectCores()#for parallel processing
 # Prepare the data
 
@@ -216,8 +218,8 @@ AltercentricDiagnosis_PriorCheck_m <- brm(
   cores = cores,
   file = "AltercentricDiagnosis_PriorCheck_m"
 )
-
-pp_check(AltercentricDiagnosis_PriorCheck_m, nsamples = 100)
+#
+pp_check(AltercentricDiagnosis_PriorCheck_m, nsamples = 100)+ggtitle("AI~Diagnosis PriorCheck")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
@@ -242,7 +244,7 @@ plot(AltercentricDiagnosis_m)
 
 ``` r
 # Posterior predictive check
-pp_check(AltercentricDiagnosis_m, nsamples = 100)
+pp_check(AltercentricDiagnosis_m, nsamples = 100)+ggtitle("AI~Diagnosis Posterior predictive check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-3.png)<!-- -->
@@ -278,10 +280,10 @@ AltercentricDiagnosis_m
 ``` r
 # Hypothesis testing + updating check
 plot(hypothesis(AltercentricDiagnosis_m,
-           "DiagnosisSchizophrenia > DiagnosisControls"))
+           "DiagnosisSchizophrenia > DiagnosisControls"))[[1]]+ggtitle("Is AI higher in Schizophrenia patients?")
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-4.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-4.png)<!-- -->![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-5.png)<!-- -->
 
 ``` r
 hypothesis(AltercentricDiagnosis_m,
@@ -300,13 +302,7 @@ hypothesis(AltercentricDiagnosis_m,
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-conditional_effects(AltercentricDiagnosis_m)
-```
-
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-5.png)<!-- -->
-
-``` r
-plot(conditional_effects(AltercentricDiagnosis_m), points=T)
+plot(conditional_effects(AltercentricDiagnosis_m), points=T,plot=F)[[1]]+ggtitle("Estimates of AI ~ Diagnosis")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-1-6.png)<!-- -->
@@ -415,7 +411,7 @@ check_prior <- function(formula, data, prior, filename){
   sample_prior = "only",
   control = list( adapt_delta = 0.95),
   core = cores,
-  file = "filename")
+  file = filename)
   
   p_check <- pp_check(model, nsamples = 100)
   return(p_check)
@@ -423,36 +419,36 @@ check_prior <- function(formula, data, prior, filename){
 
 ## prior checking
 
-checkprior_VH <- check_prior(AI_VoiceHearing_f1, schizoData, priorR2, checkprior_VH)
-checkprior_VH
+checkprior_VH <- check_prior(AI_VoiceHearing_f1, schizoData, priorR2, "checkprior_VH")
+checkprior_VH+ggtitle("AI~VoiceHearing Prior check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
-checkprior_MR <- check_prior(AI_MindReading_f1, schizoData, priorR2, checkprior_MR)
-checkprior_MR
+checkprior_MR <- check_prior(AI_MindReading_f1, schizoData, priorR2, "checkprior_MR")
+checkprior_MR+ggtitle("AI~MindReading Prior check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
 
 ``` r
-checkprior_Apathy <- check_prior(AI_Apathy_f1, schizoData, priorR2, checkprior_Apathy)
-checkprior_Apathy
+checkprior_Apathy <- check_prior(AI_Apathy_f1, schizoData, priorR2, "checkprior_Apathy")
+checkprior_Apathy+ggtitle("AI~Apathy Prior check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
 
 ``` r
-checkprior_VH_MR <- check_prior(AI_VH_MR_f1, schizoData, priorR2, ceckprior_VH_MR)
-checkprior_VH_MR
+checkprior_VH_MR <- check_prior(AI_VH_MR_f1, schizoData, priorR2, "checkprior_VH_MR")
+checkprior_VH_MR+ggtitle("AI~VoiceHearing+MindReading Prior check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-2-4.png)<!-- -->
 
 ``` r
-checkprior_VC_MR_A <- check_prior(AI_VH_MR_A_f1, schizoData, priorR2, checkprior_VC_MR_A)
-checkprior_VC_MR_A
+checkprior_VC_MR_A <- check_prior(AI_VH_MR_A_f1, schizoData, priorR2, "checkprior_VC_MR_A")
+checkprior_VC_MR_A+ggtitle("AI~VoiceHearing+MindReading+Apathy Prior check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-2-5.png)<!-- -->
@@ -483,7 +479,7 @@ plot(VoiceHearing1)
 ``` r
 # a plot for a posterior check
 VH_posch <- pp_check(VoiceHearing1, nsamples = 100)
-VH_posch
+VH_posch+ggtitle("Ai~VoiceHearing Posterior Check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
@@ -506,16 +502,10 @@ VH_hyp
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-plot(VH_hyp)  
+plot(conditional_effects(VoiceHearing1), points = T)[[1]]+ggtitle("Ai~VoiceHearing")
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-3.png)<!-- -->
-
-``` r
-plot(conditional_effects(VoiceHearing1), points = T)
-```
-
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-4.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-3.png)<!-- -->![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-4.png)<!-- -->
 
 ``` r
 ## mind reading ##
@@ -564,7 +554,7 @@ plot(MindReading1)
 ``` r
 # a plot for a posterior check
 MR_posch <- pp_check(MindReading1, nsamples = 100)
-MR_posch
+MR_posch+ggtitle("Ai~MindReading Posterior Check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-6.png)<!-- -->
@@ -587,16 +577,16 @@ MR_hyp
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-plot(MR_hyp)  
+plot(MR_hyp)
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-7.png)<!-- -->
 
 ``` r
-plot(conditional_effects(MindReading1), points = T)
+plot(conditional_effects(MindReading1), points = T)[[1]]+ggtitle("Ai~MindReading")
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-8.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-8.png)<!-- -->![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-9.png)<!-- -->
 
 ``` r
 ## apathy ##
@@ -640,15 +630,15 @@ Apathy1
 plot(Apathy1)
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-9.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-10.png)<!-- -->
 
 ``` r
 # a plot for a posterior check
 A_posch <- pp_check(Apathy1, nsamples = 100)
-A_posch
+A_posch+ggtitle("Ai~Apathy Posterior Check")
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-10.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-11.png)<!-- -->
 
 ``` r
 # test and plot your hypothesis
@@ -669,13 +659,13 @@ A_hyp
 plot(A_hyp)  
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-11.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-12.png)<!-- -->
 
 ``` r
-plot(conditional_effects(Apathy1), points = T)
+plot(conditional_effects(Apathy1), points = T)[[1]]+ggtitle("Ai~Apathy")
 ```
 
-![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-12.png)<!-- -->
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-13.png)<!-- -->![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-3-14.png)<!-- -->
 
 ``` r
 ## voice hearing, mind reading
@@ -723,7 +713,7 @@ plot(AI_VH_MR_m1)
 
 ``` r
 # Posterior predictive check
-pp_check(AI_VH_MR_m1, nsamples = 100)
+pp_check(AI_VH_MR_m1, nsamples = 100)+ggtitle("AI~VoiceHearing+MindReading Posterior Predictive Check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
@@ -767,13 +757,13 @@ hypothes_VHMR_MR
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-pp1 <- plot(hypothes_VHMR_VH)
+plot(hypothes_VHMR_VH,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
-pp2 <- plot(hypothes_VHMR_MR)
+plot(hypothes_VHMR_MR,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
@@ -833,7 +823,7 @@ plot(AI_VH_MR_A_m1)
 
 ``` r
 # Posterior predictive check
-pp_check(AI_VH_MR_A_m1, nsamples = 100)
+pp_check(AI_VH_MR_A_m1, nsamples = 100)+ggtitle("AI~VoiceHearing+MindReading+Apathy Posterior Predictive Check")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-8.png)<!-- -->
@@ -894,19 +884,19 @@ hypothes3_Apathy
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-plot(hypothes3_VH)
+plot(hypothes3_VH,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading+Apathy")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-9.png)<!-- -->
 
 ``` r
-plot(hypothes3_MR)
+plot(hypothes3_MR,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading+Apathy")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-10.png)<!-- -->
 
 ``` r
-plot(hypothes3_Apathy)
+plot(hypothes3_Apathy,plot=F)[[1]]+ggtitle("AI~VoiceHearing+MindReading+Apathy")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-4-11.png)<!-- -->
@@ -1004,8 +994,8 @@ champion_A_f <- bf(
   AltercentricIntrusion ~ 1 + Apathy)
 
 # prior check
-checkprior_champion <- check_prior(champion_A_f, d, priorR2)
-checkprior_champion
+checkprior_champion <- check_prior(champion_A_f, d, priorR2,"AI~Apathy_allData")
+checkprior_champion+ggtitle("AI~Apathy prior check using all data")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
@@ -1057,7 +1047,7 @@ plot(champion_A_m)
 ``` r
 # a plot for a posterior check
 champion_posch <- pp_check(champion_A_m, nsamples = 100)
-champion_posch
+champion_posch+ggtitle("AI~Apathy Posterior Pedictive Check using all data")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
@@ -1078,13 +1068,13 @@ champion_hyp
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-plot(champion_hyp)  
+plot(champion_hyp,plot = F)[[1]]+ggtitle("Using all data") 
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
 
 ``` r
-plot(conditional_effects(champion_A_m), points = T)
+plot(conditional_effects(champion_A_m), points = T,plot=F)[[1]]+ggtitle("Estimates of AI ~ Apathy using all data")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
@@ -1095,7 +1085,7 @@ TheoryFormula <- bf(
   AltercentricIntrusion ~ 1 + MindReading+VoiceHearing)
 
 # prior check
-checkprior_TheoryFormula <- check_prior(TheoryFormula, d, priorR2)
+checkprior_TheoryFormula <- check_prior(TheoryFormula, d, priorR2,"AI~VH_MR_AllData")
 checkprior_TheoryFormula
 ```
 
@@ -1149,7 +1139,7 @@ plot(TheoryFormulaModel)
 ``` r
 # a plot for a posterior check
 theory_posch <- pp_check(TheoryFormulaModel, nsamples = 100)
-theory_posch
+theory_posch +ggtitle("AI~MindReading+VoiceHearing Prior Check using all data")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Theory%20correction-3.png)<!-- -->
@@ -1188,13 +1178,13 @@ theory_hyp_VH
     ## Posterior probabilities of point hypotheses assume equal prior probabilities.
 
 ``` r
-plot(theory_hyp_MR) 
+plot(theory_hyp_MR,plot=F)[[1]]+ggtitle("AI~MindReading+VoiceHearing Hypothesis Test using all data") 
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Theory%20correction-4.png)<!-- -->
 
 ``` r
-plot(theory_hyp_VH)
+plot(theory_hyp_VH,plot=F)[[1]]+ggtitle("AI~MindReading+VoiceHearing Hypothesis Test using all data")
 ```
 
 ![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Theory%20correction-5.png)<!-- -->
@@ -1239,6 +1229,341 @@ loo_model_weights(TheoryFormulaModel,
     ##                    weight
     ## TheoryFormulaModel 0.953 
     ## champion_A_m       0.047
+
+``` r
+### voice hearing
+VoiceHearing2 <- brm(
+    formula = AI_VoiceHearing_f1,
+    data = d,
+    family = gaussian,
+    prior = priorR2,
+    sample_prior = T,
+    refresh = 0,
+    cores = cores,
+    file = "VoiceHearing2"
+    
+  )
+  VoiceHearing2
+```
+
+    ##  Family: gaussian 
+    ##   Links: mu = identity; sigma = identity 
+    ## Formula: AltercentricIntrusion ~ 1 + VoiceHearing 
+    ##    Data: d (Number of observations: 300) 
+    ## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+    ##          total post-warmup samples = 4000
+    ## 
+    ## Population-Level Effects: 
+    ##              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## Intercept        0.00      0.06    -0.11     0.10 1.00     4180     3032
+    ## VoiceHearing     0.19      0.06     0.07     0.30 1.00     4154     2539
+    ## 
+    ## Family Specific Parameters: 
+    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sigma     0.99      0.04     0.91     1.07 1.00     4545     3014
+    ## 
+    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
+    ## scale reduction factor on split chains (at convergence, Rhat = 1).
+
+``` r
+# a plot for a posterior check
+VH_posch2 <- pp_check(VoiceHearing2, nsamples = 100)
+VH_posch2
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-1.png)<!-- -->
+
+``` r
+# test and plot your hypothesis
+VH_hyp2 <- hypothesis(VoiceHearing2, "VoiceHearing > 0")
+VH_hyp2
+```
+
+    ## Hypothesis Tests for class b:
+    ##           Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob
+    ## 1 (VoiceHearing) > 0     0.19      0.06     0.09     0.28        999         1
+    ##   Star
+    ## 1    *
+    ## ---
+    ## 'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+    ## '*': For one-sided hypotheses, the posterior probability exceeds 95%;
+    ## for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+    ## Posterior probabilities of point hypotheses assume equal prior probabilities.
+
+``` r
+plot(VH_hyp2)  
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-2.png)<!-- -->
+
+``` r
+plot(conditional_effects(VoiceHearing2), points = T)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-3.png)<!-- -->
+
+``` r
+## mind reading
+
+MindReading2 <- brm(
+    formula = AI_MindReading_f1,
+    data = d,
+    family = gaussian,
+    prior = priorR2,
+    sample_prior = T,
+    refresh = 0,
+    cores = cores,
+    file = "MindReading2"
+    )
+
+MindReading2
+```
+
+    ##  Family: gaussian 
+    ##   Links: mu = identity; sigma = identity 
+    ## Formula: AltercentricIntrusion ~ 1 + MindReading 
+    ##    Data: d (Number of observations: 300) 
+    ## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+    ##          total post-warmup samples = 4000
+    ## 
+    ## Population-Level Effects: 
+    ##             Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## Intercept      -0.00      0.06    -0.11     0.11 1.00     4536     3000
+    ## MindReading     0.19      0.05     0.08     0.29 1.00     4611     3050
+    ## 
+    ## Family Specific Parameters: 
+    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sigma     0.99      0.04     0.91     1.07 1.00     4277     3158
+    ## 
+    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
+    ## scale reduction factor on split chains (at convergence, Rhat = 1).
+
+``` r
+# a plot for a posterior check
+MR_posch2 <- pp_check(MindReading2, nsamples = 100)
+MR_posch2
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-4.png)<!-- -->
+
+``` r
+# test and plot your hypothesis
+MR_hyp2 <- hypothesis(MindReading2, "MindReading > 0")
+MR_hyp2
+```
+
+    ## Hypothesis Tests for class b:
+    ##          Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob
+    ## 1 (MindReading) > 0     0.19      0.05      0.1     0.28       3999         1
+    ##   Star
+    ## 1    *
+    ## ---
+    ## 'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+    ## '*': For one-sided hypotheses, the posterior probability exceeds 95%;
+    ## for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+    ## Posterior probabilities of point hypotheses assume equal prior probabilities.
+
+``` r
+plot(MR_hyp2)  
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-5.png)<!-- -->
+
+``` r
+plot(conditional_effects(MindReading2), points = T)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-6.png)<!-- -->
+
+``` r
+# VH + MR + A
+AI_VH_MR_A_m2 <- brm(
+  formula = AI_VH_MR_A_f1,
+  data = d,
+  family = gaussian,
+  prior = priorR2,
+  sample_prior = T,
+  cores = cores,
+  file = "AI_VH_MR_A_m2"
+)
+
+AI_VH_MR_A_m2
+```
+
+    ##  Family: gaussian 
+    ##   Links: mu = identity; sigma = identity 
+    ## Formula: AltercentricIntrusion ~ 1 + Apathy + MindReading + VoiceHearing 
+    ##    Data: d (Number of observations: 300) 
+    ## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+    ##          total post-warmup samples = 4000
+    ## 
+    ## Population-Level Effects: 
+    ##              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## Intercept        0.00      0.05    -0.11     0.11 1.00     4903     2917
+    ## Apathy           0.02      0.06    -0.10     0.13 1.00     4171     3087
+    ## MindReading      0.16      0.06     0.06     0.27 1.00     5466     3458
+    ## VoiceHearing     0.16      0.06     0.05     0.27 1.00     4826     3277
+    ## 
+    ## Family Specific Parameters: 
+    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sigma     0.97      0.04     0.90     1.06 1.00     4739     3021
+    ## 
+    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
+    ## scale reduction factor on split chains (at convergence, Rhat = 1).
+
+``` r
+# Posterior predictive check
+pp_check(AI_VH_MR_A_m2, nsamples = 100)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-7.png)<!-- -->
+
+``` r
+# Hypothesis testing + updating check
+
+hypothes3_VH2 <- hypothesis(AI_VH_MR_A_m2,
+           "VoiceHearing > 0")
+
+hypothes3_MR2 <- hypothesis(AI_VH_MR_A_m2,
+           "MindReading > 0")
+
+hypothes3_Apathy2 <- hypothesis(AI_VH_MR_A_m2,
+           "Apathy > 0")
+
+
+hypothes3_VH2
+```
+
+    ## Hypothesis Tests for class b:
+    ##           Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob
+    ## 1 (VoiceHearing) > 0     0.16      0.06     0.07     0.26     332.33         1
+    ##   Star
+    ## 1    *
+    ## ---
+    ## 'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+    ## '*': For one-sided hypotheses, the posterior probability exceeds 95%;
+    ## for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+    ## Posterior probabilities of point hypotheses assume equal prior probabilities.
+
+``` r
+hypothes3_MR2
+```
+
+    ## Hypothesis Tests for class b:
+    ##          Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob
+    ## 1 (MindReading) > 0     0.16      0.06     0.07     0.25        799         1
+    ##   Star
+    ## 1    *
+    ## ---
+    ## 'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+    ## '*': For one-sided hypotheses, the posterior probability exceeds 95%;
+    ## for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+    ## Posterior probabilities of point hypotheses assume equal prior probabilities.
+
+``` r
+hypothes3_Apathy2
+```
+
+    ## Hypothesis Tests for class b:
+    ##     Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob Star
+    ## 1 (Apathy) > 0     0.02      0.06    -0.08     0.11       1.58      0.61     
+    ## ---
+    ## 'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+    ## '*': For one-sided hypotheses, the posterior probability exceeds 95%;
+    ## for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+    ## Posterior probabilities of point hypotheses assume equal prior probabilities.
+
+``` r
+plot(hypothes3_VH2)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-8.png)<!-- -->
+
+``` r
+plot(hypothes3_MR2)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-9.png)<!-- -->
+
+``` r
+plot(hypothes3_Apathy2)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-10.png)<!-- -->
+
+``` r
+## conditional effects
+plot(conditional_effects(AI_VH_MR_A_m2), points = T)
+```
+
+![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-11.png)<!-- -->![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-12.png)<!-- -->![](Assignment3_Peter-_Bella_Jakub_Bianka_Ruta_files/figure-gfm/Building%20other%20models-13.png)<!-- -->
+
+``` r
+## adding criterion loo
+VoiceHearing2 <- add_criterion(VoiceHearing2, criterion = "loo")
+```
+
+    ## Automatically saving the model object in 'VoiceHearing2.rds'
+
+``` r
+MindReading2 <- add_criterion(MindReading2, criterion = "loo")
+```
+
+    ## Automatically saving the model object in 'MindReading2.rds'
+
+``` r
+champion_A_m  <- add_criterion(champion_A_m, criterion = "loo")
+```
+
+    ## Automatically saving the model object in 'Champion_Apathy_m.rds'
+
+``` r
+TheoryFormulaModel <- add_criterion(TheoryFormulaModel, criterion = "loo")
+```
+
+    ## Automatically saving the model object in 'TheoryModel_VH_MR.rds'
+
+``` r
+AI_VH_MR_A_m2 <- add_criterion(AI_VH_MR_A_m2, criterion = "loo")
+```
+
+    ## Automatically saving the model object in 'AI_VH_MR_A_m2.rds'
+
+``` r
+loo_compare(VoiceHearing2,
+            MindReading2,
+            champion_A_m,
+            TheoryFormulaModel,
+            AI_VH_MR_A_m2)
+```
+
+    ##                    elpd_diff se_diff
+    ## TheoryFormulaModel  0.0       0.0   
+    ## AI_VH_MR_A_m2      -0.9       0.3   
+    ## MindReading2       -3.4       3.0   
+    ## VoiceHearing2      -3.6       2.9   
+    ## champion_A_m       -8.2       4.3
+
+``` r
+## adding wights
+loo_model_weights(VoiceHearing2,
+            MindReading2,
+            champion_A_m,
+            TheoryFormulaModel,
+            AI_VH_MR_A_m2)
+```
+
+    ## Method: stacking
+    ## ------
+    ##                    weight
+    ## VoiceHearing2      0.066 
+    ## MindReading2       0.127 
+    ## champion_A_m       0.000 
+    ## TheoryFormulaModel 0.806 
+    ## AI_VH_MR_A_m2      0.000
 
 ## Third part
 
